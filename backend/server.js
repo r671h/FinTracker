@@ -1,5 +1,4 @@
 require('dotenv').config();
-require('dotenv').config()
 require('express-async-errors');
 
 const express = require('express');
@@ -16,13 +15,23 @@ const aiRoutes = require('./routes/ai');
 
 const app = express();
 
-// Connect to MongoDB
 connectDB();
 
-// Security middleware
-app.use(helmet());
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:3000',
+].filter(Boolean);
+ 
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Render health checks)
+    if (!origin) return callback(null, true);
+    // Allow any vercel.app subdomain for preview deployments
+    if (origin.endsWith('.vercel.app') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error(`CORS blocked: ${origin}`));
+  },
   credentials: true,
 }));
 
