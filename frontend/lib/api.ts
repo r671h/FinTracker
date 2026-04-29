@@ -5,7 +5,7 @@ const api = axios.create({
   timeout: 30000,
 });
 
-// Attach JWT from localStorage on every request
+// Attach JWT on every request
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('fintrack_token');
@@ -14,20 +14,22 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Global 401 → redirect to login
+// On 401 — clear storage but do NOT redirect here.
 api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('fintrack_token');
-      localStorage.removeItem('fintrack_user');
-      window.location.href = '/login';
+      const isLoginAttempt = err.config?.url?.includes('/auth/login');
+      if (!isLoginAttempt) {
+        localStorage.removeItem('fintrack_token');
+        localStorage.removeItem('fintrack_user');
+      }
     }
     return Promise.reject(err);
   }
 );
 
-// ── Auth ─────────────────────────────────────────────────────────────────────
+//Auth
 export const authApi = {
   register: (data: { name: string; email: string; password: string; currency?: string }) =>
     api.post('/auth/register', data),
@@ -37,7 +39,7 @@ export const authApi = {
   updateMe: (data: object) => api.patch('/auth/me', data),
 };
 
-// ── Accounts ──────────────────────────────────────────────────────────────────
+//Accounts
 export const accountsApi = {
   list: () => api.get('/accounts'),
   get: (id: string) => api.get(`/accounts/${id}`),
@@ -47,7 +49,7 @@ export const accountsApi = {
   stats: (id: string) => api.get(`/accounts/${id}/stats`),
 };
 
-// ── Transactions ──────────────────────────────────────────────────────────────
+//Transactions 
 export const transactionsApi = {
   list: (params?: object) => api.get('/transactions', { params }),
   stats: (params?: object) => api.get('/transactions/stats', { params }),
@@ -60,7 +62,7 @@ export const transactionsApi = {
   delete: (id: string) => api.delete(`/transactions/${id}`),
 };
 
-// ── AI ────────────────────────────────────────────────────────────────────────
+//AI 
 export const aiApi = {
   chat: (message: string, history: { role: string; content: string }[]) =>
     api.post('/ai/analyse', { message, history }),

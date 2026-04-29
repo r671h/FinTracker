@@ -5,15 +5,14 @@ import { useAuthStore } from '@/lib/auth';
 
 export default function Home() {
   const router = useRouter();
-  const { isAuthenticated, initFromStorage } = useAuthStore();
+  const { isAuthenticated, isInitialising, init } = useAuthStore();
+
+  useEffect(() => { init(); }, []);
 
   useEffect(() => {
-    initFromStorage();
-  }, []);
-
-  useEffect(() => {
+    if (isInitialising) return;
     router.replace(isAuthenticated ? '/dashboard' : '/login');
-  }, [isAuthenticated]);
+  }, [isInitialising, isAuthenticated]);
 
   return (
     <div className="flex items-center justify-center h-screen">

@@ -6,17 +6,16 @@ import { useAuthStore } from '@/lib/auth';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, initFromStorage } = useAuthStore();
+  const { isAuthenticated, isInitialising, init } = useAuthStore();
+
+  useEffect(() => { init(); }, []);
 
   useEffect(() => {
-    initFromStorage();
-  }, []);
-
-  useEffect(() => {
+    if (isInitialising) return;
     if (!isAuthenticated) router.replace('/login');
-  }, [isAuthenticated]);
+  }, [isInitialising, isAuthenticated]);
 
-  if (!isAuthenticated) {
+  if (isInitialising || !isAuthenticated) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="w-6 h-6 border-2 border-brand-green border-t-transparent rounded-full animate-spin" />
@@ -27,9 +26,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
-        {children}
-      </main>
+      <main className="flex-1 overflow-y-auto">{children}</main>
     </div>
   );
 }
