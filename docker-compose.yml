@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+  # MongoDB
+  mongo:
+    image: mongo:7
+    container_name: fintrack-mongo
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: fintrack
+
+  # Express API
+  backend:
+    build: ./backend
+    container_name: fintrack-api
+    restart: unless-stopped
+    ports:
+      - '5000:5000'
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGODB_URI: mongodb://mongo:27017/fintrack
+      JWT_SECRET: ${JWT_SECRET:-changeme_in_production}
+      JWT_EXPIRES_IN: 7d
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      CLIENT_URL: http://localhost:3000
+    depends_on:
+      - mongo
+
+  # Next.js frontend
+  frontend:
+    build: ./frontend
+    container_name: fintrack-web
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:5000/api
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
