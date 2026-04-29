@@ -1,62 +1,40 @@
-# ── Dependencies ──────────────────────────────────────────────────────────────
+# Delete the broken one and create a clean one
+Set-Content .gitignore -Encoding UTF8 -Value @"
 node_modules/
 .pnp
 .pnp.js
 
-# ── Environment variables ─────────────────────────────────────────────────────
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# ── Next.js ───────────────────────────────────────────────────────────────────
 frontend/.next/
 frontend/out/
 frontend/build/
 frontend/.vercel
 
-# ── Build outputs ─────────────────────────────────────────────────────────────
 backend/dist/
 build/
 dist/
 
-# ── Logs ─────────────────────────────────────────────────────────────────────
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-# ── OS ───────────────────────────────────────────────────────────────────────
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 desktop.ini
 
-# ── IDE ───────────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
-*.swp
-*.swo
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
 
-# ── Testing ───────────────────────────────────────────────────────────────────
 coverage/
-.nyc_output/
 
-# ── Misc ─────────────────────────────────────────────────────────────────────
 *.zip
 *.tgz
 .cache/
-tmp/
-temp/
+"@
