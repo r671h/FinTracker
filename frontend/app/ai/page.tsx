@@ -64,7 +64,7 @@ export default function AIPage() {
             </div>
             <div>
               <div className="text-xs font-semibold">AI Finance Analyst</div>
-              <div className="text-[10px] text-gray-400">Powered by Claude · has access to your real transaction data</div>
+              <div className="text-[10px] text-gray-400">Powered by Gemini · has access to your real transaction data</div>
             </div>
           </div>
 
