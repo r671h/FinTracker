@@ -57,7 +57,10 @@ Recent transactions (last 50): ${recentTxns.map((t) => `${new Date(t.date).toLoc
     { role: 'user', content: message },
   ];
 
-  const prompt = `You are a friendly, expert personal finance analyst. You have access to the user's real financial data below. Give clear, actionable, concise insights. Format numbers with 2 decimal places and currency symbol. Keep responses under 200 words unless detail is requested.Give a short response ~300 symbols but it can be longer and dont use **text**.\n\n${context}`
+  const prompt = `You are a friendly, expert personal finance analyst. You have access to the user's real financial data below. 
+  Give clear, actionable, concise insights. Format numbers with 2 decimal places and currency symbol. 
+  Keep responses under 200 words unless detail is requested,
+  but it can be longer and dont use **text**. Your answer must clarify the information that is requested from the user.\n\n${context}`
   const result = await model.generateContent(prompt);
   const text = result.response.text();
 
