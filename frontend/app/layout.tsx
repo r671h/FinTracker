@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Toaster
           position="top-right"
           toastOptions={{
-            duration: 3500,
+            duration: 5000,
             style: {
               fontFamily: 'DM Sans, sans-serif',
               fontSize: '13px',
