@@ -37,7 +37,7 @@ export function Spinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
 // ─── PageHeader ───────────────────────────────────────────────────────────────
 export function PageHeader({ title, children }: { title: string; children?: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white sticky top-0 z-10">
+    <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 bg-white sticky top-0 z-10">
       <h1 className="text-base font-semibold">{title}</h1>
       {children && <div className="flex items-center gap-2">{children}</div>}
     </div>

@@ -45,6 +45,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     accountsApi.list().then((r) => setAccounts(r.data.accounts)).catch(() => {});

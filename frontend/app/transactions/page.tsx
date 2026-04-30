@@ -23,6 +23,7 @@ export default function TransactionsPage() {
   const [category, setCategory] = useState('');
   const [account, setAccount] = useState('');
   const [type, setType] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   const load = useCallback((p = 1) => {
     setLoading(true);
@@ -43,42 +44,48 @@ export default function TransactionsPage() {
     } catch { toast.error('Delete failed'); }
   };
 
+  const hasFilters = search || category || account || type;
+
   return (
     <AppLayout>
-      <PageHeader title="Transactions" />
-      <div className="p-6 space-y-4">
-        {/* Filters */}
-        <div className="flex gap-2 flex-wrap">
-          <input
-            className="input max-w-xs text-sm"
-            placeholder="Search transactions..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <select className="input w-40 text-sm" value={category} onChange={(e) => setCategory(e.target.value)}>
-            <option value="">All categories</option>
-            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <select className="input w-44 text-sm" value={account} onChange={(e) => setAccount(e.target.value)}>
-            <option value="">All accounts</option>
-            {accounts.map((a) => <option key={a._id} value={a._id}>{a.name}</option>)}
-          </select>
-          <select className="input w-36 text-sm" value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="">All types</option>
-            <option value="income">Income only</option>
-            <option value="expense">Expenses only</option>
-          </select>
-          {(search || category || account || type) && (
-            <button className="btn text-xs" onClick={() => { setSearch(''); setCategory(''); setAccount(''); setType(''); }}>
-              Clear filters
-            </button>
-          )}
-        </div>
+      <PageHeader title="Transactions">
+        <button className="btn text-xs" onClick={() => setShowFilters(!showFilters)}>
+          {showFilters ? 'Hide filters' : 'Filter'}
+          {hasFilters && <span className="w-1.5 h-1.5 rounded-full bg-brand-green ml-1" />}
+        </button>
+      </PageHeader>
 
-        {/* Table */}
+      <div className="p-4 md:p-6 space-y-4">
+        {/* Filters — collapsible on mobile */}
+        {showFilters && (
+          <div className="card p-4 space-y-3 md:space-y-0 md:flex md:gap-2 md:flex-wrap">
+            <input className="input md:max-w-xs text-sm" placeholder="Search..." value={search}
+              onChange={(e) => setSearch(e.target.value)} />
+            <select className="input md:w-40 text-sm" value={category} onChange={(e) => setCategory(e.target.value)}>
+              <option value="">All categories</option>
+              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <select className="input md:w-44 text-sm" value={account} onChange={(e) => setAccount(e.target.value)}>
+              <option value="">All accounts</option>
+              {accounts.map((a) => <option key={a._id} value={a._id}>{a.name}</option>)}
+            </select>
+            <select className="input md:w-36 text-sm" value={type} onChange={(e) => setType(e.target.value)}>
+              <option value="">All types</option>
+              <option value="income">Income</option>
+              <option value="expense">Expenses</option>
+            </select>
+            {hasFilters && (
+              <button className="btn text-xs w-full md:w-auto justify-center"
+                onClick={() => { setSearch(''); setCategory(''); setAccount(''); setType(''); }}>
+                Clear filters
+              </button>
+            )}
+          </div>
+        )}
+
         <div className="card overflow-hidden">
-          {/* Header row */}
-          <div className="grid grid-cols-[36px_1fr_auto_auto] gap-3 px-4 py-2 border-b border-gray-100 text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
+          {/* Header — hidden on mobile */}
+          <div className="hidden md:grid grid-cols-[36px_1fr_auto_auto] gap-3 px-4 py-2 border-b border-gray-100 text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
             <div />
             <div>Description</div>
             <div className="text-right">Date</div>
@@ -90,20 +97,19 @@ export default function TransactionsPage() {
           ) : transactions.length === 0 ? (
             <EmptyState icon="🔍" title="No transactions found" sub="Try adjusting your filters" />
           ) : (
-            transactions.map((t) => (
-              <TransactionRow key={t._id} transaction={t} onDelete={handleDelete} />
-            ))
+            transactions.map((t) => <TransactionRow key={t._id} transaction={t} onDelete={handleDelete} />)
           )}
         </div>
 
-        {/* Pagination */}
         {pagination && pagination.pages > 1 && (
           <div className="flex items-center justify-between text-sm text-gray-500">
-            <span>{pagination.total} transactions total</span>
+            <span className="text-xs">{pagination.total} total</span>
             <div className="flex gap-1">
-              <button className="btn text-xs" disabled={page <= 1} onClick={() => { const p = page - 1; setPage(p); load(p); }}>← Prev</button>
+              <button className="btn text-xs" disabled={page <= 1}
+                onClick={() => { const p = page - 1; setPage(p); load(p); }}>← Prev</button>
               <span className="px-3 py-1.5 text-xs font-medium">{page} / {pagination.pages}</span>
-              <button className="btn text-xs" disabled={page >= pagination.pages} onClick={() => { const p = page + 1; setPage(p); load(p); }}>Next →</button>
+              <button className="btn text-xs" disabled={page >= pagination.pages}
+                onClick={() => { const p = page + 1; setPage(p); load(p); }}>Next →</button>
             </div>
           </div>
         )}

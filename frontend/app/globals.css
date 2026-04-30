@@ -59,4 +59,22 @@
   .amount-negative {
     @apply text-brand-red font-semibold font-mono;
   }
+
+  .mobile-nav-item {
+    @apply flex flex-col items-center gap-1 flex-1 py-2 text-gray-400 transition-colors;
+  }
+  .mobile-nav-item.active {
+    @apply text-brand-green;
+  }
+
+  .page-content {
+    @apply pb-6 md:pb-0;
+  }
+}
+
+/* Mobile safe area support (iPhone notch) */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .mobile-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

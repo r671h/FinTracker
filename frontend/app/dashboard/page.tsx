@@ -9,7 +9,6 @@ import { transactionsApi, accountsApi } from '@/lib/api';
 import { TransactionStats, Transaction, Account } from '@/types';
 
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
 const CAT_COLOR: Record<string, string> = {
   groceries:'#1D9E75', dining:'#D85A30', transport:'#378ADD', shopping:'#7F77DD',
   utilities:'#EF9F27', health:'#E24B4A', entertainment:'#533AB7', income:'#1D9E75', other:'#9CA3AF',
@@ -35,7 +34,6 @@ export default function DashboardPage() {
 
   const totalBalance = accounts.reduce((s, a) => s + a.balance, 0);
   const s = stats?.summary;
-
   const monthlyData = (stats?.byMonth || []).map((m) => ({
     name: MONTH_NAMES[m._id.month - 1],
     amount: m.total,
@@ -44,12 +42,12 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <PageHeader title="Dashboard">
-        <Link href="/import" className="btn btn-primary text-xs">+ Import CSV</Link>
+        <Link href="/import" className="btn btn-primary text-xs">+ Import</Link>
       </PageHeader>
 
-      <div className="p-6 space-y-6">
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-3">
+      <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+        {/* Stats — 2 cols on mobile, 4 on desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard label="Total Balance" value={fmtAmount(totalBalance)} sub={`${accounts.length} account${accounts.length !== 1 ? 's' : ''}`} />
           <StatCard label="Income" value={fmtAmount(s?.totalIncome || 0)} sub="↑ all time" subColor="green" />
           <StatCard label="Expenses" value={fmtAmount(Math.abs(s?.totalExpenses || 0))} sub="↓ all time" subColor="red" />
@@ -61,9 +59,8 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Charts row */}
-        <div className="grid grid-cols-2 gap-4">
-          {/* Monthly bar chart */}
+        {/* Charts — stacked on mobile, side by side on desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="card p-4">
             <div className="text-sm font-semibold mb-4">Monthly Spending</div>
             {monthlyData.length === 0 ? (
@@ -87,7 +84,6 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Top categories */}
           <div className="card p-4">
             <div className="text-sm font-semibold mb-4">Top Categories</div>
             {(stats?.byCategory || []).length === 0 ? (
@@ -100,11 +96,8 @@ export default function DashboardPage() {
                     <div key={c._id} className="flex items-center gap-3">
                       <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: CAT_COLOR[c._id] || '#9CA3AF' }} />
                       <div className="flex-1 text-xs font-medium capitalize">{c._id}</div>
-                      <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full"
-                          style={{ width: `${(c.total / total) * 100}%`, background: CAT_COLOR[c._id] || '#9CA3AF' }}
-                        />
+                      <div className="w-16 md:w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${(c.total / total) * 100}%`, background: CAT_COLOR[c._id] || '#9CA3AF' }} />
                       </div>
                       <div className="text-xs font-mono text-gray-500 w-16 text-right">{fmtAmount(c.total)}</div>
                     </div>
@@ -115,7 +108,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Recent transactions */}
         <div className="card overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <div className="text-sm font-semibold">Recent Transactions</div>
