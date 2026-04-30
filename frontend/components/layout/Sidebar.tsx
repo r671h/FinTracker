@@ -45,6 +45,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     accountsApi.list().then((r) => setAccounts(r.data.accounts)).catch(() => {});
@@ -126,6 +127,34 @@ export default function Sidebar() {
           </button>
         </div>
       </div>
+      <>
+      {/* Mobile Toggle Button */}
+      <button 
+        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-primary text-white rounded-md"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {isOpen ? "X" : "Menu"}
+      </button>
+
+      {/* Sidebar Container */}
+      <aside className={`
+        fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 transform transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:translate-x-0 md:static md:inset-auto
+      `}>
+        <nav className="flex flex-col p-4 space-y-2">
+          {/* Your Nav Links Here */}
+        </nav>
+      </aside>
+
+      {/* Overlay for mobile when sidebar is open */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 md:hidden" 
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </>
     </aside>
   );
 }

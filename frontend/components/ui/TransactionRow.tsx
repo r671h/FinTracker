@@ -60,6 +60,22 @@ export default function TransactionRow({ transaction: t, onDelete }: Props) {
           </button>
         )}
       </div>
+      <div className="flex flex-col p-4 border-b md:table-row md:p-0">
+      <div className="flex justify-between md:table-cell md:py-4">
+        <span className="font-bold md:hidden">Date:</span>
+        <span>{t.date}</span>
+      </div>
+      <div className="flex justify-between md:table-cell md:py-4">
+        <span className="font-bold md:hidden">Category:</span>
+        <span className="text-right md:text-left">{t.category}</span>
+      </div>
+      <div className="flex justify-between md:table-cell md:py-4">
+        <span className="font-bold md:hidden">Amount:</span>
+        <span className={`font-semibold ${t.amount < 0 ? 'text-red-500' : 'text-green-500'}`}>
+          ${Math.abs(t.amount)}
+        </span>
+      </div>
+    </div>
     </div>
   );
 }
