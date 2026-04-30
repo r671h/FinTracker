@@ -9,7 +9,6 @@ import { Account } from '@/types';
 
 const TYPES = ['current', 'savings', 'credit', 'investment', 'cash'];
 const COLORS = ['#1D9E75', '#378ADD', '#7F77DD', '#D85A30', '#EF9F27', '#533AB7'];
-
 const TYPE_STYLE: Record<string, string> = {
   current: 'bg-green-50 text-green-700',
   savings: 'bg-blue-50 text-blue-700',
@@ -27,7 +26,6 @@ export default function AccountsPage() {
   const load = () => {
     accountsApi.list().then((r) => setAccounts(r.data.accounts)).finally(() => setLoading(false));
   };
-
   useEffect(() => { load(); }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -44,31 +42,28 @@ export default function AccountsPage() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Archive "${name}"? Transactions will be kept.`)) return;
+    if (!confirm(`Archive "${name}"?`)) return;
     try {
       await accountsApi.delete(id);
       toast.success('Account archived');
       load();
-    } catch {
-      toast.error('Failed to archive');
-    }
+    } catch { toast.error('Failed to archive'); }
   };
 
   return (
     <AppLayout>
       <PageHeader title="Accounts">
-        <button className="btn btn-primary text-xs" onClick={() => setShowModal(true)}>+ Add Account</button>
+        <button className="btn btn-primary text-xs" onClick={() => setShowModal(true)}>+ Add</button>
       </PageHeader>
 
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         {loading ? (
           <div className="flex justify-center py-16"><Spinner /></div>
         ) : accounts.length === 0 ? (
-          <div className="card">
-            <EmptyState icon="🏦" title="No accounts yet" sub="Add your first bank account to get started" />
-          </div>
+          <div className="card"><EmptyState icon="🏦" title="No accounts yet" sub="Add your first bank account" /></div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          /* 1 col on mobile, 2 on desktop */
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {accounts.map((acc) => (
               <div key={acc._id} className="card p-5 group">
                 <div className="flex items-start justify-between mb-4">
@@ -76,10 +71,8 @@ export default function AccountsPage() {
                     <div className="w-3 h-3 rounded-full" style={{ background: acc.color }} />
                     <span className={clsx('badge text-[10px]', TYPE_STYLE[acc.type])}>{acc.type}</span>
                   </div>
-                  <button
-                    onClick={() => handleDelete(acc._id, acc.name)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-red-400 text-xs"
-                  >
+                  <button onClick={() => handleDelete(acc._id, acc.name)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-red-400 text-xs">
                     Archive
                   </button>
                 </div>
@@ -104,10 +97,11 @@ export default function AccountsPage() {
         )}
       </div>
 
-      {/* Add Account Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
-          <div className="card w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/30 z-50 flex items-end md:items-center justify-center p-0 md:p-4"
+          onClick={() => setShowModal(false)}>
+          {/* Slides up from bottom on mobile, centered modal on desktop */}
+          <div className="card w-full md:max-w-md p-6 rounded-t-2xl md:rounded-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-semibold">Add Account</h2>
               <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
@@ -140,18 +134,16 @@ export default function AccountsPage() {
                 <label className="label">Color</label>
                 <div className="flex gap-2 mt-1">
                   {COLORS.map((c) => (
-                    <button
-                      key={c} type="button"
-                      className="w-6 h-6 rounded-full transition-transform hover:scale-110"
+                    <button key={c} type="button"
+                      className="w-7 h-7 rounded-full transition-transform hover:scale-110 active:scale-95"
                       style={{ background: c, outline: form.color === c ? `2px solid ${c}` : 'none', outlineOffset: 2 }}
-                      onClick={() => setForm({ ...form, color: c })}
-                    />
+                      onClick={() => setForm({ ...form, color: c })} />
                   ))}
                 </div>
               </div>
               <div className="flex gap-2 pt-2">
                 <button type="button" className="btn flex-1 justify-center" onClick={() => setShowModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary flex-1 justify-center">Create Account</button>
+                <button type="submit" className="btn btn-primary flex-1 justify-center">Create</button>
               </div>
             </form>
           </div>

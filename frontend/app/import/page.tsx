@@ -8,11 +8,7 @@ import { transactionsApi, accountsApi } from '@/lib/api';
 import { Account } from '@/types';
 
 interface ImportResult {
-  inserted: number;
-  duplicates: number;
-  skipped: number;
-  total: number;
-  message: string;
+  inserted: number; duplicates: number; skipped: number; total: number;
 }
 
 export default function ImportPage() {
@@ -34,56 +30,45 @@ export default function ImportPage() {
 
   const processFile = async (f: File) => {
     const validExt = /\.(csv|xlsx|xls)$/i.test(f.name);
-    if (!validExt) { toast.error('Only CSV and Excel (.xlsx, .xls) files are supported'); return; }
+    if (!validExt) { toast.error('Only CSV and Excel files are supported'); return; }
     if (!selectedAccount) { toast.error('Please select an account first'); return; }
-    setFile(f);
-    setResult(null);
-    setLoading(true);
-
+    setFile(f); setResult(null); setLoading(true);
     const formData = new FormData();
     formData.append('file', f);
     formData.append('accountId', selectedAccount);
-
     try {
       const res = await transactionsApi.import(formData);
       setResult(res.data);
       toast.success(`Imported ${res.data.inserted} transactions`);
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Import failed');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragging(false);
+    e.preventDefault(); setDragging(false);
     const f = e.dataTransfer.files[0];
     if (f) processFile(f);
   };
 
   return (
     <AppLayout>
-      <PageHeader title="Import CSV" />
-      <div className="p-6 max-w-xl mx-auto space-y-4">
+      <PageHeader title="Import CSV / Excel" />
+      <div className="p-4 md:p-6 max-w-xl mx-auto space-y-4">
 
-        {/* Account selector */}
         <div className="card p-4">
           <label className="label">Import to account</label>
           {accounts.length === 0 ? (
-            <p className="text-sm text-gray-400">No accounts yet. <a href="/accounts" className="text-brand-green underline">Create one first.</a></p>
+            <p className="text-sm text-gray-400">No accounts. <a href="/accounts" className="text-brand-green underline">Create one first.</a></p>
           ) : (
             <select className="input" value={selectedAccount} onChange={(e) => setSelectedAccount(e.target.value)}>
-              {accounts.map((a) => (
-                <option key={a._id} value={a._id}>{a.name} ({a.type})</option>
-              ))}
+              {accounts.map((a) => <option key={a._id} value={a._id}>{a.name} ({a.type})</option>)}
             </select>
           )}
         </div>
-
-        {/* Drop zone */}
+        
         <div
-          className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-colors ${
+          className={`border-2 border-dashed rounded-xl p-10 md:p-12 text-center cursor-pointer transition-colors ${
             dragging ? 'border-brand-green bg-green-50' : 'border-gray-200 hover:border-brand-green hover:bg-gray-50'
           }`}
           onClick={() => inputRef.current?.click()}
@@ -106,20 +91,19 @@ export default function ImportPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                 </svg>
               </div>
-              <p className="text-sm font-semibold text-gray-700">Drop your bank CSV or Excel file here</p>
-              <p className="text-xs text-gray-400 mt-1">or click to browse · .csv, .xlsx, .xls · Max 10 MB</p>
-              {file && !loading && (
-                <p className="text-xs text-brand-green mt-2 font-medium">Selected: {file.name}</p>
-              )}
+              <p className="text-sm font-semibold text-gray-700">
+                Tap to browse or drop file
+              </p>
+              <p className="text-xs text-gray-400 mt-1">.csv, .xlsx, .xls · Max 10 MB</p>
+              {file && <p className="text-xs text-brand-green mt-2 font-medium">{file.name}</p>}
             </>
           )}
         </div>
 
-        {/* Result */}
         {result && (
           <div className="card p-4 border-l-4 border-brand-green">
-            <div className="text-sm font-semibold text-brand-green mb-2">✓ Import complete</div>
-            <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="text-sm font-semibold text-brand-green mb-3">✓ Import complete</div>
+            <div className="grid grid-cols-3 gap-3 text-center mb-4">
               <div className="bg-green-50 rounded-lg p-3">
                 <div className="text-xl font-semibold font-mono text-brand-green">{result.inserted}</div>
                 <div className="text-[10px] text-gray-500 uppercase tracking-wide mt-0.5">Imported</div>
@@ -133,24 +117,17 @@ export default function ImportPage() {
                 <div className="text-[10px] text-gray-500 uppercase tracking-wide mt-0.5">Skipped</div>
               </div>
             </div>
-            <div className="flex gap-2 mt-4">
-              <button className="btn btn-primary text-xs flex-1 justify-center" onClick={() => router.push('/dashboard')}>
-                View Dashboard
-              </button>
-              <button className="btn text-xs flex-1 justify-center" onClick={() => router.push('/ai')}>
-                Analyse with AI ↗
-              </button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button className="btn btn-primary text-xs flex-1 justify-center" onClick={() => router.push('/dashboard')}>View Dashboard</button>
+              <button className="btn text-xs flex-1 justify-center" onClick={() => router.push('/ai')}>Analyse with AI ↗</button>
             </div>
           </div>
         )}
 
-        {/* Help card */}
         <div className="card p-4">
           <div className="text-xs font-semibold mb-2">How to export from your bank</div>
           <p className="text-xs text-gray-500 leading-relaxed">
-            Go to <strong>Statements</strong> or <strong>Transaction History</strong> in your online banking, then look for
-            an <strong>Export</strong> or <strong>Download</strong> button. Choose <strong>CSV</strong> or <strong>Excel</strong> format.
-            Fintrack auto-detects date, description, and amount columns from both formats.
+            Go to <strong>Statements</strong> or <strong>Transaction History</strong>, look for <strong>Export</strong> or <strong>Download</strong>. Choose CSV or Excel. Fintrack auto-detects date, description, and amount columns.
           </p>
         </div>
       </div>
