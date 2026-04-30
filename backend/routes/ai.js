@@ -59,6 +59,7 @@ Recent transactions (last 50): ${recentTxns.map((t) => `${new Date(t.date).toLoc
 
   const prompt = `System Role:
 Act as a Senior Financial Analyst with 15+ years of experience in market strategy and corporate finance. Your goal is to provide a sophisticated, data-driven answer based strictly on the provided context.
+Address user by name and maintain a professional tone. Use clear, concise language and avoid jargon. Your response should be actionable and insightful, directly addressing the user's question with evidence from the data.
 
 Task:
 Analyze the user's question using the provided data. Your response will be displayed directly on a public-facing website interface.
@@ -79,7 +80,8 @@ Context Data: ${context} \n\n
 
 Conversation History: ${history.map((m) => `${m.role.toUpperCase()}: ${m.content}`).join('\n')}
 
-Answer must be short, concise, and directly address the user's question based on the provided data.
+Answer must be short, concise, and directly address the user's question based on the provided data, dont use CAPSLOCK option,
+give an answer in normal format.
 `;
   const result = await model.generateContent(prompt);
   const text = result.response.text();
