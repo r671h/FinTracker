@@ -7,14 +7,6 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
-      container: {
-        center: true,
-        padding: {
-          DEFAULT: '1rem',
-          sm: '2rem',
-          lg: '4rem',
-        },
-      },
       colors: {
         brand: {
           green: '#1D9E75',
