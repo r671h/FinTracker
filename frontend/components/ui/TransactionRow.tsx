@@ -2,11 +2,12 @@ import { Transaction } from '@/types';
 import { de } from 'date-fns/locale';
 import React from 'react';
 
-interface TransactionProps {
-  transaction: Transaction
+interface Props {
+  transaction: Transaction,
+  onDelete?: (id: string) => void
 }
 
-export default function TransactionRow({ transaction }: TransactionProps) {
+export default function TransactionRow({ transaction }: Props) {
   const isPositive = transaction.amount > 0;
 
   return (
