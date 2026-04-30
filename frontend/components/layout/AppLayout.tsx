@@ -1,15 +1,32 @@
-import React from 'react';
-import Sidebar from './Sidebar';
+'use client';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Sidebar from '@/components/layout/Sidebar';
+import { useAuthStore } from '@/lib/auth';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const { isAuthenticated, isInitialising, init } = useAuthStore();
+
+  useEffect(() => { init(); }, []);
+
+  useEffect(() => {
+    if (isInitialising) return;
+    if (!isAuthenticated) router.replace('/login');
+  }, [isInitialising, isAuthenticated]);
+
+  if (isInitialising || !isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="w-6 h-6 border-2 border-brand-green border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-gray-50">
       <Sidebar />
-      <main className="flex-1 w-full p-4 md:p-8 mt-16 md:mt-0 overflow-x-hidden">
-        <div className="max-w-7xl mx-auto">
-          {children}
-        </div>
-      </main>
+      <main className="flex-1 overflow-y-auto">{children}</main>
     </div>
   );
-};
+}
