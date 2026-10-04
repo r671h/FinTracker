@@ -15,7 +15,12 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 // POST /api/ai/analyse
 router.post('/analyse', async (req, res) => {
   const { message, history = [] } = req.body;
-  if (!message) return res.status(400).json({ error: 'Message is required' });
+  if (typeof message !== 'string' || !message.trim()) {
+    return res.status(400).json({ error: 'Message is required' });
+  }
+  if (message.length > 2000) {
+    return res.status(400).json({ error: 'Message is too long (max 2000 characters)' });
+  }
 
   // Build financial context from DB
   const [accounts, stats, recentTxns] = await Promise.all([
@@ -52,10 +57,11 @@ Spending by category: ${byCategory.map((c) => `${c._id}: ${c.total.toFixed(2)}`)
 Recent transactions (last 50): ${recentTxns.map((t) => `${new Date(t.date).toLocaleDateString()} | ${t.description} | ${t.amount.toFixed(2)} (${t.category})`).join('\n')}
   `.trim();
 
-  const messages = [
-    ...history.slice(-10), // keep last 10 turns
-    { role: 'user', content: message },
-  ];
+  // Keep only the last 10 well-formed turns, each capped in length, to bound prompt size
+  const recentHistory = (Array.isArray(history) ? history : [])
+    .filter((m) => m && typeof m.role === 'string' && typeof m.content === 'string')
+    .slice(-10)
+    .map((m) => ({ role: m.role, content: m.content.slice(0, 2000) }));
 
   const prompt = `System Role:
 Act as a Senior Financial Analyst with 15+ years of experience in market strategy and corporate finance. Your goal is to provide a sophisticated, data-driven answer based strictly on the provided context.
@@ -78,7 +84,7 @@ User Question: ${message} \n\n
 
 Context Data: ${context} \n\n
 
-Conversation History: ${history.map((m) => `${m.role.toUpperCase()}: ${m.content}`).join('\n')}
+Conversation History: ${recentHistory.map((m) => `${m.role.toUpperCase()}: ${m.content}`).join('\n')}
 
 Answer must be short, concise, and directly address the user's question based on the provided data, dont use CAPSLOCK option,
 give an answer in normal format.

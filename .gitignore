@@ -1,5 +1,3 @@
-# Delete the broken one and create a clean one
-Set-Content .gitignore -Encoding UTF8 -Value @"
 node_modules/
 .pnp
 .pnp.js
@@ -37,4 +35,5 @@ coverage/
 *.zip
 *.tgz
 .cache/
-"@
+
+*.tsbuildinfo

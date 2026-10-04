@@ -64,7 +64,7 @@ export default function AIPage() {
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.length === 0 && (
               <div className="max-w-xs bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-gray-700 leading-relaxed">
-                👋 Hi! I'm your AI finance analyst. Ask me anything about your spending patterns and savings.
+                👋 Hi! I&apos;m your AI finance analyst. Ask me anything about your spending patterns and savings.
               </div>
             )}
             {messages.map((msg, i) => (
