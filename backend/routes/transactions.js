@@ -10,6 +10,8 @@ const auth = require('../middleware/auth');
 const router = express.Router();
 router.use(auth);
 
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // Multer: memory storage for CSV / Excel
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -48,7 +50,7 @@ router.get('/', async (req, res) => {
   if (req.query.type === 'income') filter.amount = { $gt: 0 };
   if (req.query.type === 'expense') filter.amount = { $lt: 0 };
   if (req.query.search) {
-    filter.description = { $regex: req.query.search, $options: 'i' };
+    filter.description = { $regex: escapeRegex(String(req.query.search)), $options: 'i' };
   }
 
   const [transactions, total] = await Promise.all([
@@ -268,8 +270,9 @@ router.post('/import', upload.single('file'), async (req, res) => {
   const inserted  = result.upsertedCount;
   const duplicates = toInsert.length - inserted;
 
-  // Update account balance by net of newly inserted transactions
-  const netNew = toInsert.slice(0, inserted).reduce((s, t) => s + t.amount, 0);
+  // Update account balance by net of newly inserted transactions.
+  // upsertedIds is keyed by op index, so duplicates anywhere in the file are skipped correctly.
+  const netNew = Object.keys(result.upsertedIds).reduce((s, i) => s + toInsert[i].amount, 0);
   account.balance += netNew;
   await account.save();
 
@@ -284,13 +287,30 @@ router.put('/:id', async (req, res) => {
   const updates = {};
   allowed.forEach((f) => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
 
-  const transaction = await Transaction.findOneAndUpdate(
+  if (updates.amount !== undefined) {
+    updates.amount = Number(updates.amount);
+    if (!Number.isFinite(updates.amount)) {
+      return res.status(400).json({ error: 'Amount must be a number' });
+    }
+  }
+
+  const previous = await Transaction.findOneAndUpdate(
     { _id: req.params.id, user: req.user._id },
     updates,
-    { new: true, runValidators: true }
-  ).populate('account', 'name color type');
+    { new: false, runValidators: true }
+  );
 
-  if (!transaction) return res.status(404).json({ error: 'Transaction not found' });
+  if (!previous) return res.status(404).json({ error: 'Transaction not found' });
+
+  // Keep the account balance in sync when the amount changes
+  if (updates.amount !== undefined && updates.amount !== previous.amount) {
+    await Account.updateOne(
+      { _id: previous.account },
+      { $inc: { balance: updates.amount - previous.amount } }
+    );
+  }
+
+  const transaction = await Transaction.findById(previous._id).populate('account', 'name color type');
   res.json({ transaction });
 });
 
